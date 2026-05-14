@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'minio'
+    metrics_path: /minio/v2/metrics/cluster
+    bearer_token: eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJwcm9tZXRoZXVzIiwiZXhwIjo0OTMyMzg4OTA4fQ.Nu_fUiA5orX1cNTfi7LGy4NjvFZSmlWj0MB5gWUyoX5hsIQGk6qd0VX4v9-P4KvJ9e445ogitupRfqd3waqVdg
+    static_configs:
+      - targets: ['minio:9000']

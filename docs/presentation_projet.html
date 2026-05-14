@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Présentation Data Architect Project</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Montserrat:wght@200;300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        /* --- TYPOGRAPHY & THEME --- */
+        :root {
+            --bg-dark: #1c1917;
+            --text-main: #f5f5f4;
+            --text-muted: #a8a29e;
+
+            /* Dynamic Variables (Default: Spring/Pink) */
+            --theme-accent: #f472b6;
+            --theme-rgb: 244, 114, 182;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+            /* Prevent scrolling, act like PPT */
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            transition: --theme-accent 1s ease;
+        }
+
+        h1,
+        h2,
+        h3,
+        .font-heading {
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        /* --- THEME CLASSES --- */
+        .theme-text {
+            color: var(--theme-accent);
+            transition: color 1s ease;
+        }
+
+        .theme-border {
+            border-color: var(--theme-accent);
+            transition: border-color 1s ease;
+        }
+
+        .theme-bg-soft {
+            background-color: rgba(var(--theme-rgb), 0.1);
+            transition: background-color 1s ease;
+        }
+
+        .theme-bg-glow {
+            background-color: rgba(var(--theme-rgb), 0.2);
+            transition: background-color 1s ease;
+        }
+
+        .gold-gradient-text {
+            background: linear-gradient(to right, #fbf7f1, var(--theme-accent), #78350f);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            transition: background 1s ease;
+        }
+
+        /* --- SLIDE CONTAINER --- */
+        #presentation-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .slide {
+            position: absolute;
+            width: 85%;
+            /* 16:9 Aspect Ratio feel */
+            max-width: 1400px;
+            height: 75%;
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 20;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateY(-10%) scale(1);
+            pointer-events: all;
+            z-index: 20;
+        }
+
+        /* --- BATTLE CANVAS --- */
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* --- COMPONENTS --- */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .section-tag {
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--theme-accent);
+            margin-bottom: 1rem;
+            display: block;
+            transition: color 1s ease;
+        }
+
+        /* --- NAVIGATION CONTROLS --- */
+        .controls {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 1rem;
+            z-index: 60;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: var(--theme-accent);
+            color: var(--bg-dark);
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: var(--theme-accent);
+            transition: width 0.3s, background 1s ease;
+            z-index: 60;
+        }
+
+        .slide-number {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.3);
+            z-index: 60;
+        }
+
+        /* --- DIAGRAM STYLES (SVG) --- */
+        svg text {
+            font-family: 'Montserrat', sans-serif;
+            fill: #a8a29e;
+        }
+
+        svg .uml-box-rect {
+            fill: rgba(28, 25, 23, 0.8);
+            stroke: var(--theme-accent);
+            stroke-width: 1;
+            transition: stroke 1s ease;
+        }
+
+        svg .uml-line {
+            stroke: #78716c;
+            stroke-width: 1.5;
+        }
+
+        svg .uml-line-dashed {
+            stroke: var(--theme-accent);
+            stroke-width: 1.5;
+            stroke-dasharray: 5, 5;
+            transition: stroke 1s ease;
+        }
+
+        /* Dynamic SVG Fills */
+        .svg-fill-accent {
+            fill: var(--theme-accent);
+            transition: fill 1s ease;
+        }
+
+        .svg-stroke-accent {
+            stroke: var(--theme-accent);
+            transition: stroke 1s ease;
+        }
+
+        /* --- LIST STYLES --- */
+        ul.custom-list li {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        ul.custom-list li::before {
+            content: '✦';
+            color: var(--theme-accent);
+            font-size: 1.2rem;
+            line-height: 1.5rem;
+            transition: color 1s ease;
+        }
+
+        /* AI Feature icon pulse */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+
+        .ai-pulse {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- BACKGROUND ANIMATION -->
+    <canvas id="bgCanvas" class="fixed top-0 left-0 w-full h-full -z-10"></canvas>
+
+    <!-- SLIDE CONTAINER -->
+    <div id="presentation-container">
+
+        <!-- ================================================ -->
+        <!-- SLIDE 1: TITLE (Ingestion) -->
+        <!-- ================================================ -->
+        <div class="slide active" data-slide="1">
+            <div class="text-center">
+                <div class="inline-block mb-4 p-4 rounded-full border border-white/10 theme-bg-soft backdrop-blur-md">
+                    <i data-lucide="database" class="w-16 h-16 theme-text mx-auto"></i>
+                </div>
+                <h2 class="text-xl tracking-[0.5em] text-stone-400 uppercase mb-4">Ingénierie des Données</h2>
+                <h1 class="text-7xl md:text-9xl font-heading font-thin mb-6 gold-gradient-text">
+                    Data Architect
+                </h1>
+                <p class="text-3xl font-light text-white italic mb-12">Pipeline d'Actualités Automatisé</p>
+
+                <div class="glass-panel inline-block text-left max-w-2xl mx-auto">
+                    <p class="text-stone-300"><strong class="theme-text">Technologies :</strong> Apache Airflow, Kafka, MinIO, PostgreSQL, Superset, Docker</p>
+                    <p class="text-stone-300"><strong class="theme-text">Concept :</strong> Collecte, traitement, stockage et visualisation de données d'actualité en continu</p>
+                    <p class="text-stone-300 mt-4 text-sm opacity-70">Présenté par: ANAS Mouqine</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================ -->
+        <!-- SLIDE 2: CONTEXT (Ingestion) -->
+        <!-- ================================================ -->
+        <div class="slide" data-slide="2">
+            <span class="section-tag">01. Introduction</span>
+            <div class="grid grid-cols-2 gap-12 items-center h-full">
+                <div>
+                    <h2 class="text-5xl mb-8 text-white">Contexte du Projet</h2>
+                    <p class="text-xl text-stone-300 leading-relaxed mb-6">
+                        L'information numérique est produite en masse, nécessitant des <span
+                            class="theme-text italic">pipelines robustes</span> pour être exploitée de manière fiable.
+                    </p>
+                    <div class="glass-panel">
+                        <h3 class="text-2xl theme-text mb-4">La Problématique</h3>
+                        <p class="text-stone-400">Comment collecter, stocker et analyser des flux constants d'articles provenant de multiples sources hétérogènes (Hespress, BBC, Al Jazeera, CNN, Reuters) sans perte de données et avec une haute disponibilité ?</p>
+                    </div>
+                </div>
+                <div class="relative h-full flex items-center justify-center">
+                    <div class="absolute inset-0 theme-bg-soft rounded-full blur-3xl opacity-20"></div>
+                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop"
+                        class="relative rounded-lg shadow-2xl border border-white/10 opacity-80" alt="Data Context">
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================ -->
+        <!-- SLIDE 3: OBJECTIVES (Lakehouse) -->
+        <!-- ================================================ -->
+        <div class="slide" data-slide="3">
+            <span class="section-tag">01. Introduction</span>
+            <h2 class="text-5xl mb-12 text-center text-white">Objectifs du Pipeline</h2>
+            <div class="grid grid-cols-4 gap-6">
+                <div class="glass-panel text-center hover:bg-white/5 transition duration-500">
+                    <div class="w-16 h-16 theme-bg-glow rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i data-lucide="bot" class="w-8 h-8 theme-text"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-4">Scraping Automatisé</h3>
+                    <p class="text-xs text-stone-400">Extracteurs OOP en Python avec BeautifulSoup pour divers formats de sites d'actualité.</p>
+                </div>
+                <div class="glass-panel text-center hover:bg-white/5 transition duration-500">
+                    <div class="w-16 h-16 theme-bg-glow rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i data-lucide="layers" class="w-8 h-8 theme-text"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-4">Data Lakehouse</h3>
+                    <p class="text-xs text-stone-400">Architecture "Medallion" (Bronze, Silver, Gold) hébergée sur MinIO (S3-compatible).</p>
+                </div>
+                <div class="glass-panel text-center hover:bg-white/5 transition duration-500">
+                    <div class="w-16 h-16 theme-bg-glow rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i data-lucide="zap" class="w-8 h-8 theme-text"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-4">Message Brokering</h3>
+                    <p class="text-xs text-stone-400">Apache Kafka & Zookeeper pour découpler l'ingestion et gérer de hauts débits.</p>
+                </div>
+                <div class="glass-panel text-center hover:bg-white/5 transition duration-500">
+                    <div class="w-16 h-16 theme-bg-glow rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i data-lucide="bar-chart-2" class="w-8 h-8 theme-text"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-4">Data Visualization</h3>
+                    <p class="text-xs text-stone-400">Apache Superset connecté au Data Warehouse PostgreSQL pour la BI.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================ -->
+        <!-- SLIDE 4: ARCHITECTURE (Lakehouse) -->
+        <!-- ================================================ -->
+        <div class="slide" data-slide="4">
+            <span class="section-tag">02. Conception Technique</span>
+            <h2 class="text-5xl mb-6 text-white">Architecture Système (4 Couches)</h2>
+            <div class="flex flex-col gap-5 items-center justify-center h-full pb-12">
+
+                <!-- Presentation Layer -->
+                <div class="w-3/4 glass-panel border-t-4 border-blue-500 text-center py-3">
+                    <h3 class="text-lg font-bold text-blue-400 mb-1">Couche Présentation & BI</h3>
+                    <p class="text-sm">Apache Superset</p>
+                    <p class="text-xs text-stone-500">Tableaux de bord dynamiques, Analyse des tendances d'actualité</p>
+                </div>
+
+                <i data-lucide="arrow-down" class="text-stone-500"></i>
+
+                <!-- Data Warehouse Layer -->
+                <div class="w-3/4 glass-panel border-t-4 border-purple-500 text-center py-3">
+                    <h3 class="text-lg font-bold text-purple-400 mb-1">Couche Data Warehouse</h3>
+                    <p class="text-sm">PostgreSQL</p>
+                    <p class="text-xs text-stone-500">Données "Gold" structurées (Articles raffinés, agrégations)</p>
+                </div>
+
+                <i data-lucide="arrow-down" class="text-stone-500"></i>
+
+                <!-- Storage & Streaming Layer -->
+                <div class="w-3/4 glass-panel border-t-4 theme-border text-center py-3">
+                    <h3 class="text-lg font-bold theme-text mb-1">Couche Data Lake & Streaming</h3>
+                    <p class="text-sm">MinIO (Object Storage) + Apache Kafka (Message Broker)</p>
+                    <p class="text-xs text-stone-500">Buckets: Bronze (Brut), Silver (Nettoyé), Qualité, Quarantaine</p>
+                </div>
+
+                <i data-lucide="arrow-down" class="text-stone-500"></i>
+
+                <!-- Ingestion Layer -->
+                <div class="w-3/4 glass-panel border-t-4 border-emerald-500 text-center py-3">
+                    <h3 class="text-lg font-bold text-emerald-400 mb-1">Couche Ingestion & Orchestration</h3>
+                    <p class="text-sm">Apache Airflow + Python Scrapers (BeautifulSoup)</p>
+                    <p class="text-xs text-stone-500">Exécution de DAGs planifiés, extraction de sites d'informations</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================ -->
+        <!-- SLIDE 5: SEQUENCE DIAGRAM (Warehouse) -->
+        <!-- ================================================ -->
+        <div class="slide" data-slide="5">
+            <span class="section-tag">03. Flux de Données</span>
+            <h2 class="text-4xl mb-6 text-white">Séquence : Le Trajet d'un Article</h2>
+
+            <!-- ROLE LEGEND -->
+            <div class="grid grid-cols-5 gap-3 text-center font-bold text-xs mb-4 w-full max-w-5xl mx-auto">
+                <div class="text-blue-300 border border-white/10 p-2 rounded bg-stone-900/50">
+                    <i data-lucide="clock" class="mx-auto mb-1 w-4 h-4"></i> Airflow
+                </div>
+                <div class="text-green-300 border border-white/10 p-2 rounded bg-stone-900/50">
+                    <i data-lucide="code" class="mx-auto mb-1 w-4 h-4"></i> Scrapers
+                </div>
+                <div class="theme-text border border-white/10 p-2 rounded bg-stone-900/50">
+                    <i data-lucide="zap" class="mx-auto mb-1 w-4 h-4"></i> Kafka
+                </div>
+                <div class="text-purple-300 border border-white/10 p-2 rounded bg-stone-900/50">
+                    <i data-lucide="hard-drive" class="mx-auto mb-1 w-4 h-4"></i> MinIO
+                </div>
+                <div class="text-amber-300 border border-white/10 p-2 rounded bg-stone-900/50">
+                    <i data-lucide="database" class="mx-auto mb-1 w-4 h-4"></i> Postgres/Superset
+                </div>
+            </div>
+
+            <div class="bg-white/5 p-4 rounded-lg w-full max-w-5xl mx-auto flex flex-col justify-center">
+                <div class="relative grid grid-cols-5 w-full">
+                    <div class="border-r border-dashed border-white/10 h-full mx-auto w-0"></div>
+                    <div class="border-r border-dashed border-white/10 h-full mx-auto w-0"></div>
+                    <div class="border-r border-dashed border-white/10 h-full mx-auto w-0"></div>
+                    <div class="border-r border-dashed border-white/10 h-full mx-auto w-0"></div>
+                    <div class="h-full mx-auto w-0"></div>
+
+                    <div class="absolute top-2 left-0 w-full text-xs font-mono space-y-4">
+                        <div class="flex items-center w-full">
+                            <div class="w-1/5 text-right pr-2 text-blue-300">1. Trigger Schedule</div>
+                            <div class="w-1/5 h-0.5 bg-blue-500/50 relative"><span class="absolute right-0 -top-1.5 text-blue-500">></span></div>
+                        </div>
+                        <div class="flex items-center w-full">
+                            <div class="w-1/5"></div>
+                            <div class="w-1/5 text-right pr-2 text-green-300">2. Fetch & Parse HTML</div>
+                            <div class="w-1/5 h-0.5 bg-green-500/50 relative"><span class="absolute right-0 -top-1.5 text-green-500">></span></div>
+                        </div>
+                        <div class="flex items-center w-full mt-2">
+                            <div class="w-2/5"></div>
+                            <div class="w-1/5 text-right pr-2 theme-text">3. Produce Topic Message</div>
+                            <div class="w-1/5 h-0.5 theme-bg-glow relative"><span class="absolute right-0 -top-1.5 theme-text">></span></div>
+                        </div>
+                        <div class="flex items-center w-full">
+                            <div class="w-2/5"></div>
+                            <div class="w-1/5 text-right pr-2 theme-text">4. Consumer Batch</div>
+                            <div class="w-1/5 h-0.5 theme-bg-glow relative"><span class="absolute right-0 -top-1.5 theme-text">></span></div>
+                        </div>
+                        <div class="flex items-center w-full">
+                            <div class="w-3/5"></div>
+                            <div class="w-1/5 text-right pr-2 text-purple-300">5. Save to Bronze Layer</div>
+                            <div class="w-1/5 h-0.5 bg-purple-500/50 relative"><span class="absolute right-0 -top-1.5 text-purple-500">></span></div>
+                        </div>
+                        <div class="flex items-center w-full">
+                            <div class="w-3/5"></div>
+                            <div class="w-1/5 text-right pr-2 text-purple-300">6. Clean -> Silver/Gold</div>
+                            <div class="w-1/5 h-0.5 bg-purple-500/50 relative"><span class="absolute right-0 -top-1.5 text-purple-500">></span></div>
+                        </div>
+                        <div class="flex items-center w-full mt-2">
+                            <div class="w-3/5"></div>
+                            <div class="w-1/5 text-right pr-2 text-purple-300">7. Load to DWH</div>
+                            <div class="w-1/5 h-0.5 bg-amber-500/50 relative"><span class="absolute right-0 -top-1.5 text-amber-500">></span></div>
+                        </div>
+                        <div class="flex items-center w-full">
+                            <div class="w-1/5"></div>
+                            <div class="w-4/5 border-t border-dashed border-stone-500 text-stone-500 text-xs pl-4 pt-1">
+                                8. Superset queries PostgreSQL for Real-Time Dashboard updates</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="h-60"></div>
+            </div>
+        </div>
+
+        <!-- ================================================ -->
+        <!-- SLIDE 6: TECH STACK (Warehouse) -->
+        <!-- ================================================ -->
+        <div class="slide" data-slide="6">
+            <span class="section-tag">04. Technologies</span>
+            <h2 class="text-5xl mb-10 text-center text-white">Stack Technologique (Moderne & Scalable)</h2>
+            <div class="grid grid-cols-3 gap-8">
+                <!-- Data Lake -->
+                <div class="glass-panel">
+                    <h3 class="text-xl theme-text mb-4 border-b border-white/10 pb-2">Ingestion & Storage</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 bg-purple-900/50 rounded flex items-center justify-center font-bold text-purple-300 text-xs">Py</div>
+                            <div>
+                                <p class="font-bold text-sm">Python & BeautifulSoup</p>
+                                <p class="text-[10px] text-stone-400">Scraping asynchrone, POO</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 bg-blue-900/50 rounded flex items-center justify-center font-bold text-blue-300 text-xs">AF</div>
+                            <div>
+                                <p class="font-bold text-sm">Apache Airflow</p>
+                                <p class="text-[10px] text-stone-400">Orchestration, Scheduling (DAGs)</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 bg-stone-700/50 rounded flex items-center justify-center font-bold text-stone-300 text-xs">M3</div>
+                            <div>
+                                <p class="font-bold text-sm">MinIO</p>
+                                <p class="text-[10px] text-stone-400">Object Storage S3-Compatible</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Processing -->
+                <div class="glass-panel">
+                    <h3 class="text-xl text-cyan-400 mb-4 border-b border-white/10 pb-2">Streaming & Processing</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 bg-cyan-900/50 rounded flex items-center justify-center font-bold text-cyan-300 text-xs">Kf</div>
+                            <div>
+                                <p class="font-bold text-sm">Apache Kafka</p>
+                                <p class="text-[10px] text-stone-400">Broker de messages, Haut débit</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 bg-yellow-900/50 rounded flex items-center justify-center font-bold text-yellow-300 text-xs">Zk</div>
+                            <div>
+                                <p class="font-bold text-sm">Zookeeper</p>
+                                <p class="text-[10px] text-stone-400">Gestion de configuration Kafka</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 bg-emerald-900/50 rounded flex items-center justify-center font-bold text-emerald-300 text-xs">Med</div>
+                            <div>
+                                <p class="font-bold text-sm">Architecture Medallion</p>
+                                <p class="text-[10px] text-stone-400">Couches Bronze, Silver, Gold</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Database & Viz -->
+                <div class="glass-panel">
+                    <h3 class="text-xl text-violet-400 mb-4 border-b border-white/10 pb-2">Warehouse & Viz</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 bg-violet-900/50 rounded flex items-center justify-center font-bold text-violet-300 text-xs">PG</div>
+                            <div>
+                                <p class="font-bold text-sm">PostgreSQL</p>
+                                <p class="text-[10px] text-stone-400">Data Warehouse structuré (ACID)</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 bg-orange-900/50 rounded flex items-center justify-center font-bold text-orange-300 text-xs">AS</div>
+                            <div>
+                                <p class="font-bold text-sm">Apache Superset</p>
+                                <p class="text-[10px] text-stone-400">Business Intelligence, Dashboards</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 bg-rose-900/50 rounded flex items-center justify-center font-bold text-rose-300 text-xs">Dck</div>
+                            <div>
+                                <p class="font-bold text-sm">Docker Compose</p>
+                                <p class="text-[10px] text-stone-400">Conteneurisation totale</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================ -->
+        <!-- SLIDE 7: SECURITY & RELIABILITY (Analytics) -->
+        <!-- ================================================ -->
+        <div class="slide" data-slide="7">
+            <span class="section-tag">05. Robustesse</span>
+            <h2 class="text-5xl mb-10 text-white">Fiabilité & Gouvernance</h2>
+            <div class="grid grid-cols-2 gap-12">
+                <div>
+                    <h3 class="text-2xl text-red-400 mb-4">Qualité des Données</h3>
+                    <ul class="custom-list text-stone-300">
+                        <li>Dossiers dédiés dans MinIO: <strong>quality/</strong> et <strong>quarantine/</strong>.</li>
+                        <li>Les articles corrompus ou invalides sont automatiquement écartés sans stopper le pipeline.</li>
+                        <li>Système de <strong>Lineage Tracking</strong> pour tracer la provenance de la donnée.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-2xl text-blue-400 mb-4">Tolérance aux Pannes</h3>
+                    <ul class="custom-list text-stone-300">
+                        <li><strong>Apache Kafka</strong> permet de stocker les articles en cas d'indisponibilité de la base.</li>
+                        <li><strong>Airflow</strong> gère les "retries" automatiques sur échec des scrapers.</li>
+                        <li>Infrastructure <strong>Docker-Compose</strong> avec redémarrage automatique (`restart: unless-stopped`).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================ -->
+        <!-- SLIDE 8: CONCLUSION (Ingestion) -->
+        <!-- ================================================ -->
+        <div class="slide" data-slide="8">
+            <span class="section-tag">06. Conclusion</span>
+            <div class="text-center max-w-3xl mx-auto">
+                <h2 class="text-6xl mb-8 gold-gradient-text">Data Architect</h2>
+                <p class="text-xl text-stone-300 mb-10">
+                    Un projet complet démontrant la conception et l'implémentation d'un pipeline de données moderne, du scraping initial jusqu'à la visualisation analytique.
+                </p>
+
+                <div class="grid grid-cols-3 gap-6 text-left mb-12">
+                    <div class="glass-panel">
+                        <h4 class="theme-text font-bold mb-2 text-sm">Automatisation</h4>
+                        <p class="text-xs text-stone-400">Collecte sans intervention humaine via Airflow DAGs.</p>
+                    </div>
+                    <div class="glass-panel">
+                        <h4 class="theme-text font-bold mb-2 text-sm">Scalabilité</h4>
+                        <p class="text-xs text-stone-400">Architecture découplée grâce à Kafka et MinIO S3.</p>
+                    </div>
+                    <div class="glass-panel">
+                        <h4 class="theme-text font-bold mb-2 text-sm">Analyse Directe</h4>
+                        <p class="text-xs text-stone-400">Warehouse SQL + Superset pour l'aide à la décision.</p>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <p class="text-2xl text-white font-heading">Merci de votre attention</p>
+                    <p class="text-stone-500 mt-2">Avez-vous des questions ?</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="progress-bar" id="progressBar"></div>
+    <div class="slide-number">01 / 08</div>
+
+    <div class="controls">
+        <button class="control-btn" onclick="prevSlide()"><i data-lucide="chevron-left"></i></button>
+        <button class="control-btn" onclick="nextSlide()"><i data-lucide="chevron-right"></i></button>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+        // Init Icons
+        lucide.createIcons();
+
+        // THEME CONFIGURATION
+        const themes = {
+            ingestion: { accent: '#3b82f6', rgb: '59, 130, 246' },
+            lakehouse: { accent: '#10b981', rgb: '16, 185, 129' },
+            warehouse: { accent: '#8b5cf6', rgb: '139, 92, 246' },
+            analytics: { accent: '#f59e0b', rgb: '245, 158, 11' }
+        };
+
+        // Custom mapping for 8 slides
+        function getTheme(slide) {
+            if (slide <= 2) return 'ingestion';
+            if (slide <= 4) return 'lakehouse';
+            if (slide <= 6) return 'warehouse';
+            if (slide <= 7) return 'analytics';
+            return 'ingestion';
+        }
+
+        let currentSlide = 1;
+        const totalSlides = 8;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const numberDisplay = document.querySelector('.slide-number');
+        let currentTheme = 'ingestion';
+
+        function updateSlide() {
+            slides.forEach(s => {
+                s.classList.remove('active');
+                if (parseInt(s.dataset.slide) === currentSlide) {
+                    s.classList.add('active');
+                }
+            });
+
+            // Update Progress
+            const progress = (currentSlide / totalSlides) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            // Update Number
+            numberDisplay.innerText = `${String(currentSlide).padStart(2, '0')} / 08`;
+
+            // Update Theme
+            const newTheme = getTheme(currentSlide);
+            if (newTheme !== currentTheme) {
+                currentTheme = newTheme;
+                const config = themes[currentTheme];
+
+                // Update CSS Variables
+                document.documentElement.style.setProperty('--theme-accent', config.accent);
+                document.documentElement.style.setProperty('--theme-rgb', config.rgb);
+
+                // Reset Particles to match
+                initParticles();
+                
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); nextSlide(); }
+            if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prevSlide(); }
+        });
+
+        // --- BG PARTICLES ---
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let bgParts = [];
+
+        function initParticles() {
+            bgParts = [];
+            for (let i = 0; i < 60; i++) bgParts.push({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, s: Math.random() * 2 + 1 });
+        }
+        function animateBg() {
+            bgCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+            bgCtx.fillStyle = themes[currentTheme].accent;
+            bgCtx.globalAlpha = 0.2;
+            bgParts.forEach(p => {
+                p.y += 1; if (p.y > window.innerHeight) p.y = 0;
+                bgCtx.beginPath(); bgCtx.arc(p.x, p.y, p.s, 0, Math.PI * 2); bgCtx.fill();
+            });
+            requestAnimationFrame(animateBg);
+        }
+
+        window.addEventListener('resize', () => {
+            bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight;
+            initParticles();
+        });
+        bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight;
+
+        initParticles(); animateBg();
+        
+        updateSlide();
+
+    </script>
+</body>
+
+</html>

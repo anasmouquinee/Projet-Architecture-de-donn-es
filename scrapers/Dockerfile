@@ -1,0 +1,15 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Dependencias del sistema para lxml
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc libxml2-dev libxslt-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["python", "-u", "run_scrapers.py"]
